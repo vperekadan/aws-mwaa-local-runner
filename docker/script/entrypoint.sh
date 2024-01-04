@@ -65,7 +65,10 @@ wait_for_port() {
 execute_startup_script() {
   # Execute customer provided shell script
   if [[ -e "$AIRFLOW_HOME/startup.sh" ]]; then
-    bash "$AIRFLOW_HOME/startup.sh"
+    # bash "$AIRFLOW_HOME/startup.sh"
+    sudo amazon-linux-extras install epel -y
+    sudo yum install which gdal gdal-devel -y
+    which gdal-config; gdal-config --version
     # source stored_env
     export AIRFLOW_HOME="/usr/local/airflow"
     export AIRFLOW__CORE__LOAD_EXAMPLES="False"
