@@ -57,7 +57,7 @@ VERSION
 ## Get started
 
 ```bash
-git clone https://github.com/aws/aws-mwaa-local-runner.git
+git clone https://github.com/vperekadan/aws-mwaa-local-runner.git
 cd aws-mwaa-local-runner
 ```
 
