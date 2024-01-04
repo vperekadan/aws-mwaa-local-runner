@@ -3,7 +3,7 @@
 # DESCRIPTION: Amazon MWAA Local Dev Environment
 # BUILD: docker build --rm -t amazon/mwaa-local .
 
-FROM --platform=linux/amd64 amazonlinux
+FROM --platform=linux/amd64 amazonlinux:2
 LABEL maintainer="amazon"
 
 # Airflow
@@ -26,7 +26,7 @@ COPY script/bootstrap.sh /bootstrap.sh
 COPY script/systemlibs.sh /systemlibs.sh
 COPY script/generate_key.sh /generate_key.sh
 COPY config/constraints.txt /constraints.txt
-#COPY config/requirements.txt /requirements.txt
+# COPY config/requirements.txt /requirements.txt
 COPY config/mwaa-base-providers-requirements.txt /mwaa-base-providers-requirements.txt
 
 RUN chmod u+x /systemlibs.sh && /systemlibs.sh
@@ -37,6 +37,7 @@ RUN chmod u+x /generate_key.sh && /generate_key.sh
 COPY script/entrypoint.sh /entrypoint.sh
 COPY config/airflow.cfg ${AIRFLOW_USER_HOME}/airflow.cfg
 COPY config/webserver_config.py ${AIRFLOW_USER_HOME}/webserver_config.py
+COPY startup_script/startup.sh ${AIRFLOW_USER_HOME}/startup.sh
 
 RUN chown -R airflow: ${AIRFLOW_USER_HOME}
 RUN chmod +x /entrypoint.sh
@@ -47,6 +48,7 @@ COPY fix_sqlite.sh fix_sqlite.sh
 RUN /bin/bash fix_sqlite.sh
 ENV LD_LIBRARY_PATH=/usr/local/lib
 EXPOSE 8080 5555 8793
+RUN chmod u+x ${AIRFLOW_USER_HOME}/startup.sh
 
 USER airflow
 WORKDIR ${AIRFLOW_USER_HOME}
