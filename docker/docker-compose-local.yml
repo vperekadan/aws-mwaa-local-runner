@@ -12,34 +12,31 @@ services:
                 max-file: "3"
         volumes:
             - "${PWD}/db-data:/var/lib/postgresql/data"
-    docker-in-docker:
-        image: bobrik/socat
-        platform: "linux/amd64"
-        restart: always
-        command: "TCP-LISTEN:2375,fork UNIX-CONNECT:/var/run/docker.sock"
-        privileged: true
-        volumes:
-            -  /var/run/docker.sock:/var/run/docker.sock
+        networks:
+           - network1
+
 
     local-runner:
-        image: amazon/mwaa-local:2_4
-        platform: "linux/amd64"
+        image: amazon/mwaa-local:2_4_3
         restart: always
         depends_on:
             - postgres
         environment:
             - LOAD_EX=n
             - EXECUTOR=Local
+            - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
         logging:
             options:
                 max-size: 10m
                 max-file: "3"
         volumes:
-            - "${dag_path:-$PWD/dags}:/usr/local/airflow/dags"
+            - "${PWD}/dags:/usr/local/airflow/dags"
             - "${PWD}/plugins:/usr/local/airflow/plugins"
-            - "${requiremnets_path:-$PWD/requirements}:/usr/local/airflow/requirements"
+            - "${PWD}/requirements:/usr/local/airflow/requirements"
+            - "${PWD}/startup_script:/usr/local/airflow/startup"
         ports:
             - "8080:8080"
+            - "8888:8888"
         command: local-runner
         healthcheck:
             test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
@@ -48,3 +45,9 @@ services:
             retries: 3
         env_file:
             - ./config/.env.localrunner
+        networks:
+           - network1
+networks:
+   network1:
+       name: csdap-stac-api_default
+       external: true
